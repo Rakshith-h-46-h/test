@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback/NPS Scale</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .row {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .col-scale {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-scale {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .scale-label-left,
+        .scale-label-right {
+            font-family: 'Lato', sans-serif;
+            font-weight: bold;
+            color: black;
+        }
+
+        .btn-scale {
+            flex: 1;
+            min-width: 44px;
+            text-align: center;
+            font-weight: bold;
+            color: black;
+            font-family: 'Lato', sans-serif;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            cursor: pointer;
+        }
+
+        .btn-scale:hover {
+            background-color: #f0f0f0;
+        }
+
+        .btn-scale:disabled {
+            cursor: not-allowed;
+            background-color: #e0e0e0;
+            color: #a0a0a0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-scale">
+                <p class="page-header">Feedback/NPS </p>
+                <div class="chart-scale">
+                    <button class="btn btn-scale">0</button>
+                    <button class="btn btn-scale">1</button>
+                    <button class="btn btn-scale">2</button>
+                    <button class="btn btn-scale">3</button>
+                    <button class="btn btn-scale">4</button>
+                    <button class="btn btn-scale">5</button>
+                    <button class="btn btn-scale">6</button>
+                    <button class="btn btn-scale">7</button>
+                    <button class="btn btn-scale">8</button>
+                    <button class="btn btn-scale">9</button>
+                    <button class="btn btn-scale">10</button>
+                </div>
+                <div class="scale-labels">
+                    <span class="scale-label-left">Very Bad</span>
+                    <span class="scale-label-right">Extremely Likely</span>
+                </div>
+                <div id="selected-rating">You selected: </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const ratingButtons = document.querySelectorAll('.btn-scale');
+        const selectedRatingDisplay = document.getElementById('selected-rating');
+
+        // Function to handle button click
+        function handleButtonClick(event) {
+            const ratingValue = event.target.innerText; // Get selected rating value
+            selectedRatingDisplay.innerText = `You selected: ${ratingValue}`; // Display the rating
+
+            // Disable all buttons after a rating is selected
+            ratingButtons.forEach(button => {
+                button.disabled = true;
+            });
+
+            // Post message to parent window
+            window.parent.postMessage({
+                event_code: 'ym-client-event',
+                data: JSON.stringify({
+                    event: {
+                        code: "nps",
+                        data: {
+                            rating: ratingValue
+                        }
+                    }}
+                )
+            }, '*'); // '*' allows messages from any domain. Adjust this based on your setup.
+        }
+
+        // Attach event listeners to all buttons
+        ratingButtons.forEach(button => {
+            button.addEventListener('click', handleButtonClick);
+        });
+
+        // Listen for messages from the parent window
+        window.addEventListener('message', (event) => {
+            console.log("Received message from parent window:", event.data);
+        });
+    </script>
+</body>
+
+</html>
